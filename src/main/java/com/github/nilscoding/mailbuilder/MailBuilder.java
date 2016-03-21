@@ -652,7 +652,11 @@ public class MailBuilder {
                         htmlContentPart.setContent(htmlContent, htmlType);
                         mainMultipart.addBodyPart(htmlContentPart);
                     } else {
-                        message.setContent(htmlContent, htmlContentCharset);
+                        String htmlType = "text/html";
+                        if (StringUtils.isEmpty(htmlContentCharset) == false) {
+                            htmlType = htmlType + "; charset=" + htmlContentCharset;
+                        }
+                        message.setContent(htmlContent, htmlType);
                     }
                 } else {
                     // html plus images
