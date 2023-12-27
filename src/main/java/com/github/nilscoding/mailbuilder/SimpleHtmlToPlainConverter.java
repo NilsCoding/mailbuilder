@@ -1,14 +1,22 @@
 package com.github.nilscoding.mailbuilder;
 
 /**
- * Simple implementation for converting an HTML document to plain text
+ * Simple implementation for converting an HTML document to plain text.
  * @author nilscoding
  */
 public class SimpleHtmlToPlainConverter implements HtmlToPlainConverter {
 
+    /**
+     * Creates a new converter instance.
+     */
     public SimpleHtmlToPlainConverter() {
     }
-    
+
+    /**
+     * Converts the given HTML text to plain text.
+     * @param htmlText html text to convert
+     * @return converted text
+     */
     @Override
     public String convertHtmlToPlainText(String htmlText) {
         if (htmlText == null) {
@@ -44,8 +52,8 @@ public class SimpleHtmlToPlainConverter implements HtmlToPlainConverter {
         tmpStr = tmpStr.replaceAll("(?s)[\\n]{3,}", "\n\n");
         // trim text
         tmpStr = tmpStr.trim();
-        
+
         return tmpStr;
     }
-    
+
 }

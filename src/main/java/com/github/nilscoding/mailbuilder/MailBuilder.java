@@ -1,66 +1,100 @@
 package com.github.nilscoding.mailbuilder;
 
 import com.github.nilscoding.mailbuilder.utils.StringUtils;
-import java.util.LinkedList;
-import java.util.List;
+
 import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Mail Builder, used for building a message with optional attachments and inline attachments
+ * Mail Builder, used for building a message with optional attachments and inline attachments.
  * @author nilscoding
  */
 public class MailBuilder {
 
-    private Session session;
-    private final List<InternetAddress> from = new LinkedList<>();
-    private final List<InternetAddress> to = new LinkedList<>();
-    private final List<InternetAddress> cc = new LinkedList<>();
-    private final List<InternetAddress> bcc = new LinkedList<>();
-    private String subject;
-    private StringContentProvider plainTextProvider;
-    private StringContentProvider htmlTextProvider;
-    private HtmlToPlainConverter plainConverter = null;
-    private final List<BinaryContentProvider> inlineImages = new LinkedList<>();
-    private final List<BinaryContentProvider> attachments = new LinkedList<>();
-    
-    private MailBuilder() {
-    }
-    
     /**
-     * Creates a new MailBuilder based on a MailSession
-     * @param mailSession   mail session
-     * @return  new MailBuilder instance
+     * Session.
+     */
+    protected Session session;
+    /**
+     * List with sender addresses.
+     */
+    protected final List<InternetAddress> from = new LinkedList<>();
+    /**
+     * List with recipient addresses.
+     */
+    protected final List<InternetAddress> to = new LinkedList<>();
+    /**
+     * List with CC addresses.
+     */
+    protected final List<InternetAddress> cc = new LinkedList<>();
+    /**
+     * List with BCC addresses.
+     */
+    protected final List<InternetAddress> bcc = new LinkedList<>();
+    /**
+     * Subject.
+     */
+    protected String subject;
+    /**
+     * Provider for plain text content.
+     */
+    protected StringContentProvider plainTextProvider;
+    /**
+     * Provider for HTML content.
+     */
+    protected StringContentProvider htmlTextProvider;
+    /**
+     * HTML-to-plain converter.
+     */
+    protected HtmlToPlainConverter plainConverter = null;
+    /**
+     * List with inline image providers.
+     */
+    protected final List<BinaryContentProvider> inlineImages = new LinkedList<>();
+    /**
+     * List with attachment data providers.
+     */
+    protected final List<BinaryContentProvider> attachments = new LinkedList<>();
+    /**
+     * Last exception.
+     */
+    protected Exception lastException;
+
+    protected MailBuilder() {
+    }
+
+    /**
+     * Creates a new MailBuilder based on a MailSession. An underlying JavaMail session will be requested immediately.
+     * @param mailSession mail session
+     * @return new MailBuilder instance
      */
     public static MailBuilder onSession(MailSession mailSession) {
         MailBuilder mb = new MailBuilder();
         mb.session = mailSession.createNewSession();
         return mb;
     }
-    
+
     /**
-     * Creates a new MailBuilder based on a JavaMail session
-     * @param session   JavaMail session
-     * @return  new MailBuilder instance
+     * Creates a new MailBuilder based on a JavaMail session.
+     * @param session JavaMail session
+     * @return new MailBuilder instance
      */
     public static MailBuilder onSession(Session session) {
         MailBuilder mb = new MailBuilder();
         mb.session = session;
         return mb;
     }
-    
+
     /**
-     * Adds one or more senders
-     * @param address   sender address
-     * @return  builder instance
+     * Adds one or more senders.
+     * @param address sender address
+     * @return builder instance
      */
     public MailBuilder addFrom(InternetAddress... address) {
         if (address != null) {
@@ -72,11 +106,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds one or more senders
-     * @param address   sender address
-     * @return  builder instance
+     * Adds one or more senders.
+     * @param address sender address
+     * @return builder instance
      */
     public MailBuilder addFrom(String... address) {
         if (address != null) {
@@ -91,11 +125,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds senders
+     * Adds senders.
      * @param addresses sender addresses
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder addFrom(Iterable<InternetAddress> addresses) {
         if (addresses != null) {
@@ -107,11 +141,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Sets the sender, clears previously added sender
-     * @param address   sender address
-     * @return  builder instance
+     * Sets the sender, clears previously added sender.
+     * @param address sender address
+     * @return builder instance
      */
     public MailBuilder setFrom(InternetAddress address) {
         this.from.clear();
@@ -120,11 +154,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Sets the sender, clears previously added sender
-     * @param address   sender address
-     * @return  builder instance
+     * Sets the sender, clears previously added sender.
+     * @param address sender address
+     * @return builder instance
      */
     public MailBuilder setFrom(String address) {
         this.from.clear();
@@ -138,18 +172,18 @@ public class MailBuilder {
     }
 
     /**
-     * Clears all senders
-     * @return  builder instance
+     * Clears all senders.
+     * @return builder instance
      */
     public MailBuilder clearFrom() {
         this.from.clear();
         return this;
     }
-     
+
     /**
-     * Adds one or more recipients
-     * @param address   recipient address
-     * @return  builder instance
+     * Adds one or more recipients.
+     * @param address recipient address
+     * @return builder instance
      */
     public MailBuilder addTo(InternetAddress... address) {
         if (address != null) {
@@ -161,11 +195,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds one or more recipients
-     * @param address   recipient address
-     * @return  builder instance
+     * Adds one or more recipients.
+     * @param address recipient address
+     * @return builder instance
      */
     public MailBuilder addTo(String... address) {
         if (address != null) {
@@ -180,11 +214,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds recipients
+     * Adds recipients.
      * @param addresses recipient addresses
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder addTo(Iterable<InternetAddress> addresses) {
         if (addresses != null) {
@@ -195,12 +229,12 @@ public class MailBuilder {
             }
         }
         return this;
-    }    
-    
+    }
+
     /**
-     * Sets the recipient, clears previously added recipient
-     * @param address   recipient address
-     * @return  builder instance
+     * Sets the recipient, clears previously added recipient.
+     * @param address recipient address
+     * @return builder instance
      */
     public MailBuilder setTo(InternetAddress address) {
         this.to.clear();
@@ -209,11 +243,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Sets the recipient, clears previously added recipient
-     * @param address   recipient address
-     * @return  builder instance
+     * Sets the recipient, clears previously added recipient.
+     * @param address recipient address
+     * @return builder instance
      */
     public MailBuilder setTo(String address) {
         this.to.clear();
@@ -225,20 +259,20 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Clears all recipients
-     * @return  builder instance
+     * Clears all recipients.
+     * @return builder instance
      */
     public MailBuilder clearTo() {
         this.to.clear();
         return this;
     }
-    
+
     /**
-     * Adds one or more cc recipients
-     * @param address   cc recipient address
-     * @return  builder instance
+     * Adds one or more cc recipients.
+     * @param address cc recipient address
+     * @return builder instance
      */
     public MailBuilder addCc(InternetAddress... address) {
         if (address != null) {
@@ -250,11 +284,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds one or more cc recipients
-     * @param address   cc recipient address
-     * @return  builder instance
+     * Adds one or more cc recipients.
+     * @param address cc recipient address
+     * @return builder instance
      */
     public MailBuilder addCc(String... address) {
         if (address != null) {
@@ -269,11 +303,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds cc recipients
+     * Adds cc recipients.
      * @param addresses cc recipient addresses
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder addCc(Iterable<InternetAddress> addresses) {
         if (addresses != null) {
@@ -284,12 +318,12 @@ public class MailBuilder {
             }
         }
         return this;
-    } 
-    
+    }
+
     /**
-     * Sets the cc recipient, clears previously added cc recipient
-     * @param address   cc recipient address
-     * @return  builder instance
+     * Sets the cc recipient, clears previously added cc recipient.
+     * @param address cc recipient address
+     * @return builder instance
      */
     public MailBuilder setCc(InternetAddress address) {
         this.cc.clear();
@@ -298,11 +332,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Sets the cc recipient, clears previously added cc recipient
-     * @param address   cc recipient address
-     * @return  builder instance
+     * Sets the cc recipient, clears previously added cc recipient.
+     * @param address cc recipient address
+     * @return builder instance
      */
     public MailBuilder setCc(String address) {
         this.cc.clear();
@@ -314,20 +348,20 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Clears all cc recipients
-     * @return  builder instance
+     * Clears all cc recipients.
+     * @return builder instance
      */
     public MailBuilder clearCc() {
         this.cc.clear();
         return this;
     }
-    
+
     /**
-     * Adds one or more bcc recipients
-     * @param address   bcc recipient address
-     * @return  builder instance
+     * Adds one or more bcc recipients.
+     * @param address bcc recipient address
+     * @return builder instance
      */
     public MailBuilder addBcc(InternetAddress... address) {
         if (address != null) {
@@ -339,11 +373,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds one or more bcc recipients
-     * @param address   bcc recipient address
-     * @return  builder instance
+     * Adds one or more bcc recipients.
+     * @param address bcc recipient address
+     * @return builder instance
      */
     public MailBuilder addBcc(String... address) {
         if (address != null) {
@@ -358,11 +392,11 @@ public class MailBuilder {
         }
         return this;
     }
-        
+
     /**
-     * Adds bcc recipients
+     * Adds bcc recipients.
      * @param addresses bcc recipient addresses
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder addBcc(Iterable<InternetAddress> addresses) {
         if (addresses != null) {
@@ -373,12 +407,12 @@ public class MailBuilder {
             }
         }
         return this;
-    } 
-    
+    }
+
     /**
-     * Sets the bcc recipient, clears previously added bcc recipient
-     * @param address   bcc recipient address
-     * @return  builder instance
+     * Sets the bcc recipient, clears previously added bcc recipient.
+     * @param address bcc recipient address
+     * @return builder instance
      */
     public MailBuilder setBcc(InternetAddress address) {
         this.bcc.clear();
@@ -387,11 +421,11 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Sets the bcc recipient, clears previously added bcc recipient
-     * @param address   bcc recipient address
-     * @return  builder instance
+     * Sets the bcc recipient, clears previously added bcc recipient.
+     * @param address bcc recipient address
+     * @return builder instance
      */
     public MailBuilder setBcc(String address) {
         this.bcc.clear();
@@ -403,116 +437,116 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Clears all bcc recipients
-     * @return  builder instance
+     * Clears all bcc recipients.
+     * @return builder instance
      */
     public MailBuilder clearBcc() {
         this.bcc.clear();
         return this;
     }
-    
+
     /**
-     * Sets the subject
-     * @param subject   subject
-     * @return  builder instance
+     * Sets the subject.
+     * @param mailSubject subject
+     * @return builder instance
      */
-    public MailBuilder setSubject(String subject) {
-        this.subject = subject;
+    public MailBuilder setSubject(String mailSubject) {
+        this.subject = mailSubject;
         return this;
     }
-    
+
     /**
-     * Sets the plain text body, assuming UTF-8 charset
+     * Sets the plain text body, assuming UTF-8 charset.
      * @param plainText plain text body
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder setBodyPlain(String plainText) {
         this.plainTextProvider = new DefaultStringContentProvider(plainText);
         return this;
     }
-    
+
     /**
-     * Sets the plain text provider
-     * @param contentProvider   plain text provider
-     * @return  builder instance
+     * Sets the plain text provider.
+     * @param contentProvider plain text provider
+     * @return builder instance
      */
     public MailBuilder setBodyPlain(StringContentProvider contentProvider) {
         this.plainTextProvider = contentProvider;
         return this;
     }
-    
+
     /**
-     * Clears the plain text body
-     * @return  builder instance
+     * Clears the plain text body.
+     * @return builder instance
      */
     public MailBuilder clearBodyPlain() {
         this.plainTextProvider = null;
         return this;
     }
-    
+
     /**
-     * Sets the html text body, assuming UTF-8 charset
-     * @param htmlText  html text body
-     * @return  builder instance
+     * Sets the html text body, assuming UTF-8 charset.
+     * @param htmlText html text body
+     * @return builder instance
      */
     public MailBuilder setBodyHtml(String htmlText) {
         this.htmlTextProvider = new DefaultStringContentProvider(htmlText);
         return this;
     }
-    
+
     /**
-     * Sets the html text provider
-     * @param contentProvider   html text provider
-     * @return  builder instance
+     * Sets the html text provider.
+     * @param contentProvider html text provider
+     * @return builder instance
      */
     public MailBuilder setBodyHtml(StringContentProvider contentProvider) {
         this.htmlTextProvider = contentProvider;
         return this;
     }
-    
+
     /**
-     * Clears the html text body
-     * @return  builder instance
+     * Clears the html text body.
+     * @return builder instance
      */
     public MailBuilder clearBodyHtml() {
         this.htmlTextProvider = null;
         return this;
     }
-    
+
     /**
-     * Enables automatic plain text conversion from html if no plain text is set
-     * @return  builder instance
+     * Enables automatic plain text conversion from html if no plain text is set.
+     * @return builder instance
      */
     public MailBuilder enableAutoPlainFromHtml() {
         this.plainConverter = new SimpleHtmlToPlainConverter();
         return this;
     }
-    
+
     /**
-     * Enables automatic plain text conversion from html if no plain text is set using the given converter
+     * Enables automatic plain text conversion from html if no plain text is set using the given converter.
      * @param converter html-to-plain converter
-     * @return  builder instance
+     * @return builder instance
      */
     public MailBuilder enableAutoPlainFromHtml(HtmlToPlainConverter converter) {
         this.plainConverter = converter;
         return this;
     }
-    
+
     /**
-     * Disables automatic plain text conversion from html
-     * @return  builder instance
+     * Disables automatic plain text conversion from html.
+     * @return builder instance
      */
     public MailBuilder disableAutoPlainFromHtml() {
         this.plainConverter = null;
         return this;
     }
-    
+
     /**
-     * Adds one or more inline images
-     * @param inlineImage   inline image
-     * @return  builder instance
+     * Adds one or more inline images.
+     * @param inlineImage inline image
+     * @return builder instance
      */
     public MailBuilder addHtmlInlineImage(BinaryContentProvider... inlineImage) {
         if ((inlineImage != null) && (inlineImage.length > 0)) {
@@ -524,15 +558,15 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds inline images
-     * @param inlineImages  inline images
-     * @return  builder instance
+     * Adds inline images.
+     * @param htmlInlineImages inline images
+     * @return builder instance
      */
-    public MailBuilder addHtmlInlineImages(Iterable<BinaryContentProvider> inlineImages) {
-        if (inlineImages != null) {
-            for (BinaryContentProvider oneContentProvider : inlineImages) {
+    public MailBuilder addHtmlInlineImages(Iterable<BinaryContentProvider> htmlInlineImages) {
+        if (htmlInlineImages != null) {
+            for (BinaryContentProvider oneContentProvider : htmlInlineImages) {
                 if (oneContentProvider != null) {
                     this.inlineImages.add(oneContentProvider);
                 }
@@ -540,24 +574,24 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Clears all inline images
-     * @return  builder instance
+     * Clears all inline images.
+     * @return builder instance
      */
     public MailBuilder clearHtmlInlineImages() {
         this.inlineImages.clear();
         return this;
     }
-    
+
     /**
-     * Adds one or more attachments
-     * @param attachement   attachment
-     * @return  builder instance
+     * Adds one or more attachments.
+     * @param binaryAttachments attachments
+     * @return builder instance
      */
-    public MailBuilder addAttachment(BinaryContentProvider... attachement) {
-        if ((attachement != null) && (attachement.length > 0)) {
-            for (BinaryContentProvider oneContentProvider : attachement) {
+    public MailBuilder addAttachment(BinaryContentProvider... binaryAttachments) {
+        if ((binaryAttachments != null) && (binaryAttachments.length > 0)) {
+            for (BinaryContentProvider oneContentProvider : binaryAttachments) {
                 if (oneContentProvider != null) {
                     this.attachments.add(oneContentProvider);
                 }
@@ -565,15 +599,15 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Adds attachments
-     * @param attachments   attachments
-     * @return  builder instance
+     * Adds attachments.
+     * @param binaryAttachments attachments
+     * @return builder instance
      */
-    public MailBuilder addAttachments(Iterable<BinaryContentProvider> attachments) {
-        if (attachments != null) {
-            for (BinaryContentProvider oneContentProvider : attachments) {
+    public MailBuilder addAttachments(Iterable<BinaryContentProvider> binaryAttachments) {
+        if (binaryAttachments != null) {
+            for (BinaryContentProvider oneContentProvider : binaryAttachments) {
                 if (oneContentProvider != null) {
                     this.attachments.add(oneContentProvider);
                 }
@@ -581,24 +615,33 @@ public class MailBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Clears all attachments
-     * @return  builder instance
+     * Clears all attachments.
+     * @return builder instance
      */
     public MailBuilder clearAttachments() {
         return this;
     }
-    
+
     /**
-     * Builds the complete JavaMail message, ready for sending<br>
+     * Builds the complete JavaMail message, ready for sending.
      * Only uses data that has been set, no further validation is done
-     * @return  message or null on error
+     * @return message or null on error
      */
     public Message buildMessage() {
         try {
+            this.lastException = null;
             MimeMessage message = new MimeMessage(this.session);
-            message.setSubject(this.subject);
+            String tmpSubject = this.subject;
+            if (StringUtils.isEmpty(tmpSubject) == false) {
+                // ensure that the subject does not contain any line-breaks
+                tmpSubject = tmpSubject
+                        .replace("\r\n", " ")
+                        .replace("\r", " ")
+                        .replace("\n", " ");
+                message.setSubject(tmpSubject, "UTF-8");
+            }
             if (this.from.isEmpty() == false) {
                 message.addFrom(this.from.toArray(new InternetAddress[0]));
             }
@@ -613,13 +656,13 @@ public class MailBuilder {
             }
 
             Multipart mainMultipart = null;
-            
+
             // if there are any attachments, then the main part must be multipart
             if (this.attachments.isEmpty() == false) {
                 mainMultipart = new MimeMultipart();
                 message.setContent(mainMultipart);
             }
-            
+
             // collect content
             String htmlContent = null;
             String htmlContentCharset = null;
@@ -638,7 +681,7 @@ public class MailBuilder {
                 plainContent = this.plainConverter.convertHtmlToPlainText(htmlContent);
                 plainContentCharset = htmlContentCharset;
             }
-            
+
             // build html part with inline images (if any)
             if (StringUtils.isEmpty(htmlContent) == false) {
                 if (this.inlineImages.isEmpty() == true) {
@@ -726,7 +769,7 @@ public class MailBuilder {
                     message.setText(plainContent, plainContentCharset);
                 }
             }
-            
+
             // add attachments
             if ((this.attachments.isEmpty() == false) && (mainMultipart != null)) {
                 for (BinaryContentProvider oneAttachmentProvider : this.attachments) {
@@ -739,27 +782,37 @@ public class MailBuilder {
                     mainMultipart.addBodyPart(attachmentPart);
                 }
             }
-            
+
             return message;
         } catch (Exception ex) {
+            this.lastException = ex;
             return null;
         }
     }
-    
+
     /**
-     * Builds and sends the message
-     * @return  true if message was sent, false on error
+     * Builds and sends the message.
+     * @return true if message was sent, false on error
      */
     public boolean buildMessageAndSend() {
+        this.lastException = null;
         Message message = this.buildMessage();
         if (message != null) {
             try {
                 Transport.send(message);
                 return true;
             } catch (Exception ex) {
+                this.lastException = ex;
             }
         }
         return false;
     }
-    
+
+    /**
+     * Returns the last exception.
+     * @return exception or null
+     */
+    public Exception getLastException() {
+        return lastException;
+    }
 }

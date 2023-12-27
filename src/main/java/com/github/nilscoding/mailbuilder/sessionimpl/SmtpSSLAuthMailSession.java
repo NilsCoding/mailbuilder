@@ -1,41 +1,57 @@
 package com.github.nilscoding.mailbuilder.sessionimpl;
 
 import com.github.nilscoding.mailbuilder.MailSession;
-import java.util.Enumeration;
-import java.util.Properties;
+
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
- * SMTP over SSL (STARTTLS) mail session with authentification
+ * SMTP over SSL (STARTTLS) mail session with authentication.
  * @author nilscoding
  */
 public class SmtpSSLAuthMailSession implements MailSession {
-    
-    protected String host;
-    protected int port = 465;
-    protected String username;
-    protected String password;
-    protected Properties additionalProperties;
-    
+
     /**
-     * Creates a new SMTP mail session with host, port 465, username and password
-     * @param host  smtp server host name
-     * @param username  username
-     * @param password  password
+     * SMTP server host.
+     */
+    protected String host;
+    /**
+     * SMTP server port.
+     */
+    protected int port = 465;
+    /**
+     * Username.
+     */
+    protected String username;
+    /**
+     * Password.
+     */
+    protected String password;
+    /**
+     * Additional properties.
+     */
+    protected Properties additionalProperties;
+
+    /**
+     * Creates a new SMTP mail session with host, port 465, username and password.
+     * @param host     smtp server host name
+     * @param username username
+     * @param password password
      */
     public SmtpSSLAuthMailSession(String host, String username, String password) {
         this.host = host;
         this.username = username;
         this.password = password;
     }
-    
+
     /**
-     * Creates a new SMTP mail session with host, port, username and password
-     * @param host  smtp server host name
-     * @param port  smtp server port (e.g. 465 or 587)
-     * @param username  username
-     * @param password  password
+     * Creates a new SMTP mail session with host, port, username and password.
+     * @param host     smtp server host name
+     * @param port     smtp server port (e.g. 465 or 587)
+     * @param username username
+     * @param password password
      */
     public SmtpSSLAuthMailSession(String host, int port, String username, String password) {
         this.host = host;
@@ -43,11 +59,12 @@ public class SmtpSSLAuthMailSession implements MailSession {
         this.username = username;
         this.password = password;
     }
-    
+
     /**
-     * Sets additional properties, see https://javamail.java.net/nonav/docs/api/com/sun/mail/smtp/package-summary.html
-     * for examples when using Java mail
-     * @param additionalProperties  additional properties to set
+     * Sets additional properties, see
+     * <a href="https://javamail.java.net/nonav/docs/api/com/sun/mail/smtp/package-summary.html">JavaMail</a>
+     * for examples when using JavaMail.
+     * @param additionalProperties additional properties to set
      */
     public void setAdditionalProperties(Properties additionalProperties) {
         if (additionalProperties == null) {
@@ -58,17 +75,28 @@ public class SmtpSSLAuthMailSession implements MailSession {
             this.additionalProperties = additionalProperties;
         } else {
             for (Enumeration<?> en = additionalProperties.propertyNames(); en.hasMoreElements(); ) {
-                String onePropertyName = String.valueOf(en.nextElement());
+                Object tmpPropertyName = en.nextElement();
+                if (tmpPropertyName == null) {
+                    continue;
+                }
+                String onePropertyName = String.valueOf(tmpPropertyName);
                 Object onePropertyValue = additionalProperties.get(onePropertyName);
                 if (onePropertyValue instanceof CharSequence) {
-                    this.additionalProperties.setProperty(onePropertyName, ((CharSequence)onePropertyValue).toString());
+                    this.additionalProperties.setProperty(
+                            onePropertyName,
+                            ((CharSequence) onePropertyValue).toString()
+                    );
                 } else {
                     this.additionalProperties.put(onePropertyName, onePropertyValue);
                 }
             }
         }
     }
-    
+
+    /**
+     * Creates a new JavaMail session.
+     * @return new JavaMail session
+     */
     @Override
     public Session createNewSession() {
         try {
@@ -82,23 +110,23 @@ public class SmtpSSLAuthMailSession implements MailSession {
                     String onePropertyName = String.valueOf(en.nextElement());
                     Object onePropertyValue = this.additionalProperties.get(onePropertyName);
                     if (onePropertyValue instanceof CharSequence) {
-                        props.setProperty(onePropertyName, ((CharSequence)onePropertyValue).toString());
+                        props.setProperty(onePropertyName, ((CharSequence) onePropertyValue).toString());
                     } else {
                         props.put(onePropertyName, onePropertyValue);
                     }
                 }
             }
             Session session = Session.getInstance(props,
-                new javax.mail.Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
-                    }
-                });
+                    new javax.mail.Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
             return session;
         } catch (Exception ex) {
             return null;
         }
     }
-    
+
 }
